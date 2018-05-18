@@ -1,0 +1,28 @@
+{
+    "name": "metaclassing/php-ciscophonewebinterface",
+    "type": "library",
+    "description": "Object-oriented CURL library wrapper",
+    "homepage": "http://github.com/metaclassing/PHP-Curler",
+    "license": "LGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "metaclassing",
+            "email": "composer@secureobscure.com",
+            "role": "Developer"
+        },
+        {
+            "name": "iahunter",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.5.9",
+        "metaclassing/php-curler": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Metaclassing\\": "src"
+        }
+    }
+}
