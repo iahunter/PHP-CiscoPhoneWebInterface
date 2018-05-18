@@ -4,7 +4,6 @@ namespace Metaclassing\CiscoPhoneWebInterface;
 
 class SmartPhone extends Base
 {
-
     // our curler helper
     protected $curler = null;
     // the IP address (or hostname i guess) of the phone
@@ -14,7 +13,7 @@ class SmartPhone extends Base
     protected $csrfToken = '';
 
     public function __construct($phone, $port = 8443)
-	{
+    {
         // set our variables
         $this->phone = $phone;
         $this->port = $port;
@@ -34,6 +33,7 @@ class SmartPhone extends Base
         $html = $this->postLoginCreds($username, $password);
         // check the posted response for success
         $success = $this->checkLoginSuccessMessage($html);
+
         return $success;
     }
 
@@ -41,6 +41,7 @@ class SmartPhone extends Base
     {
         $html = $this->curler->get($this->baseUri);
         $this->updateCsrfToken($html);
+
         return $html;
     }
 
@@ -65,9 +66,10 @@ class SmartPhone extends Base
     {
         // check and make sure we logged in successfully
         $regex = '/You have successfully signed in as admin/';
-        if ( !preg_match($regex, $html, $hits)) {
+        if (! preg_match($regex, $html, $hits)) {
             throw new \Exception('Authentication failure, did not see login success text in '.$html);
         }
+
         return true;
     }
 
@@ -78,6 +80,7 @@ class SmartPhone extends Base
         $url = $this->baseUri.'/CGI/Java/Serviceability?adapter=certificate';
         //echo 'Getting url '.$url.PHP_EOL;
         $html = $this->curler->get($url, $referer);
+
         return $html;
     }
 
@@ -97,7 +100,7 @@ class SmartPhone extends Base
         $subjects = $certinfo['subject'];
         $pieces = [];
         // loop through and convert the pieces into a simple array
-        foreach($subjects as $key => $value) {
+        foreach ($subjects as $key => $value) {
             $pieces[] = $key.'='.$value;
         }
         // oh look fucking cisco apparently sorts the stupid DN pieces now wtf really
@@ -109,6 +112,7 @@ class SmartPhone extends Base
 
         return $stupidCiscoHtmlName;
     }
+
     protected function isStringInText($needle, $haystack)
     {
         // only fucking find function with ass backwards logic
@@ -124,6 +128,7 @@ class SmartPhone extends Base
         $url = $this->baseUri.'/CGI/Java/Serviceability?adapter=device.statistics.device';
         //echo 'Getting url '.$url.PHP_EOL;
         $html = $this->curler->get($url, $referer);
+
         return $html;
     }
 
@@ -149,6 +154,7 @@ class SmartPhone extends Base
         ];
         $html = $this->curler->post($url, $referer, $body);
         $this->updateCsrfToken($html);
+
         return $html;
     }
 
@@ -169,6 +175,7 @@ class SmartPhone extends Base
         ];
         // post the new certificate
         $html = $this->curler->post($url, $referer, $body);
+
         return $html;
     }
 
@@ -181,51 +188,52 @@ class SmartPhone extends Base
         } else {
             throw new \Exception('CSRF Token Exception, could not find CSRF token in '.$html);
         }
+
         return true;
     }
-	
-	public function getDeviceStatisticsPortNetwork()
+
+    public function getDeviceStatisticsPortNetwork()
     {
-		// get the certificates list page
+        // get the certificates list page
         $referer = $this->baseUri.'/CGI/Java/Serviceability?adapter=device.statistics.device';
         $url = $this->baseUri.'/CGI/Java/Serviceability?adapter=device.statistics.port.network';
         //echo 'Getting url '.$url.PHP_EOL;
         $html = $this->curler->get($url, $referer);
+
         return $html;
     }
-	
-	public function getNetworkInfo()
-	{
-		$html = $this->getDeviceStatisticsPortNetwork();
-		//echo $html . PHP_EOL;
 
-		$fields = ['CDP Neighbor device ID',
-					'CDP Neighbor port',
-					'CDP Neighbor IP address',
-					'LLDP Neighbor device ID',
-					'LLDP Neighbor IP address',
-					'LLDP Neighbor port',
-					'Port information',
-					]; 
-					
-		$results = [];
-		foreach($fields as $field){
-			$results[$field] = $this->parseHTMLFieldFromTable($html, $field);
-		}
-		return $results;
-	}
-	
-	protected function parseHTMLFieldFromTable($html, $fieldname)
-	{
-		$regex = '/'.$fieldname.'<\/B><\/TD><td width=20><\/TD><TD><B>(.+?)<\/B><\/TD><\/TR>/'; 
-		
-		if(!preg_match($regex, $html, $hits)){
-			throw new \Exception('Could not parse '.$fieldname.' in HTML'); 
-		}
-		if(strpos($hits[1], '>') === false){
-			return html_entity_decode($hits[1]);
-		}
+    public function getNetworkInfo()
+    {
+        $html = $this->getDeviceStatisticsPortNetwork();
+        //echo $html . PHP_EOL;
 
-	}
+        $fields = ['CDP Neighbor device ID',
+                    'CDP Neighbor port',
+                    'CDP Neighbor IP address',
+                    'LLDP Neighbor device ID',
+                    'LLDP Neighbor IP address',
+                    'LLDP Neighbor port',
+                    'Port information',
+                    ];
 
+        $results = [];
+        foreach ($fields as $field) {
+            $results[$field] = $this->parseHTMLFieldFromTable($html, $field);
+        }
+
+        return $results;
+    }
+
+    protected function parseHTMLFieldFromTable($html, $fieldname)
+    {
+        $regex = '/'.$fieldname.'<\/B><\/TD><td width=20><\/TD><TD><B>(.+?)<\/B><\/TD><\/TR>/';
+
+        if (! preg_match($regex, $html, $hits)) {
+            throw new \Exception('Could not parse '.$fieldname.' in HTML');
+        }
+        if (strpos($hits[1], '>') === false) {
+            return html_entity_decode($hits[1]);
+        }
+    }
 }
